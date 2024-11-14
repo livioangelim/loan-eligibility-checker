@@ -10,19 +10,9 @@ env/
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Ignore data files if you don’t want to track them (optional)
-*.csv
-*.dat
-*.data
-*.pkl
-
 # Ignore specific IDE or editor files
 .vscode/
 .idea/
-
-# Ignore large dataset files or folders (optional)
-dataset/
-data/
 
 # Ignore system files
 .DS_Store
@@ -35,6 +25,3 @@ poetry.lock
 *.egg-info/
 dist/
 build/
-
-# Ignore Jupyter Notebook output if not necessary
-*.ipynb
