@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Data Visualization Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center mt-4">Data Visualization Dashboard</h1>
+        <div class="text-center">
+            <h4>Distribution of Applicant Income</h4>
+            <img src="data:image/png;base64,{{ plot_url1 }}" alt="Applicant Income Histogram">
+        </div>
+        <div class="text-center">
+            <h4>Loan Status Counts</h4>
+            <img src="data:image/png;base64,{{ plot_url2 }}" alt="Loan Status Counts">
+        </div>
+        <div class="text-center">
+            <h4>Correlation Heatmap</h4>
+            <img src="data:image/png;base64,{{ plot_url3 }}" alt="Correlation Heatmap">
+        </div>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+    </div>
+</body>
+
+</html>
