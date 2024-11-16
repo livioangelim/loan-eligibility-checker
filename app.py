@@ -15,8 +15,10 @@ import base64
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for flashing messages
 
-# Load the trained model
+# Load the trained model, scaler, and feature names
 model = joblib.load('model/loan_eligibility_model.pkl')
+scaler = joblib.load('model/scaler.pkl')
+feature_names = joblib.load('model/feature_names.pkl')
 
 # Load the dataset for visualization
 data = pd.read_csv('dataset/loan-train.csv')
@@ -32,7 +34,7 @@ def validate_input(value, expected_type, choices=None):
         elif expected_type == str:
             if choices and value not in choices:
                 raise ValueError("Invalid choice")
-        return value
+        return value  # Ensure value is returned in all cases
     except (ValueError, TypeError):
         return None
 
@@ -78,37 +80,35 @@ def predict():
                 return redirect(url_for('home'))
 
             # Data preprocessing as done during training
-            if dependents == '3+':
-                dependents = 3
-            else:
-                dependents = int(dependents)
+            # Create a DataFrame with all features
+            input_dict = {
+                'Dependents': 3 if dependents == '3+' else int(dependents),
+                'ApplicantIncome': applicant_income,
+                'CoapplicantIncome': coapplicant_income,
+                'LoanAmount': loan_amount,
+                'Loan_Amount_Term': loan_amount_term,
+                'Credit_History': credit_history,
+                'Gender_Male': 1 if gender == 'Male' else 0,
+                'Married_Yes': 1 if married == 'Yes' else 0,
+                'Education_Not Graduate': 1 if education == 'Not Graduate' else 0,
+                'Self_Employed_Yes': 1 if self_employed == 'Yes' else 0,
+                'Property_Area_Semiurban': 1 if property_area == 'Semiurban' else 0,
+                'Property_Area_Urban': 1 if property_area == 'Urban' else 0,
+            }
 
-            # Create input array for numerical features
-            input_data = [
-                applicant_income, coapplicant_income, loan_amount,
-                loan_amount_term, credit_history, dependents
-            ]
+            # Ensure all features are present
+            for col in feature_names:
+                if col not in input_dict:
+                    input_dict[col] = 0  # Default value for missing features
 
-            # Encode categorical variables
-            categorical_data = [0, 0, 0, 0, 0, 0]
-            if gender == 'Male':
-                categorical_data[0] = 1
-            if married == 'Yes':
-                categorical_data[1] = 1
-            if education == 'Not Graduate':
-                categorical_data[2] = 1
-            if self_employed == 'Yes':
-                categorical_data[3] = 1
-            if property_area == 'Semiurban':
-                categorical_data[4] = 1
-            elif property_area == 'Urban':
-                categorical_data[5] = 1
+            # Create DataFrame
+            features_df = pd.DataFrame([input_dict], columns=feature_names)
 
-            # Combine all features
-            features = np.array(input_data + categorical_data).reshape(1, -1)
+            # Scale the features
+            features_scaled = scaler.transform(features_df)
 
             # Make prediction
-            prediction = model.predict(features)
+            prediction = model.predict(features_scaled)
             output = 'Eligible' if prediction[0] == 1 else 'Not Eligible'
 
             return render_template('result.html', prediction=output)
@@ -116,6 +116,9 @@ def predict():
         except Exception as e:
             flash(f"An error occurred: {str(e)}", "danger")
             return redirect(url_for('home'))
+
+    # Redirect to home if not POST
+    return redirect(url_for('home'))
 
 
 @app.route('/dashboard')
@@ -159,4 +162,4 @@ def dashboard():
 
 
 if __name__ == '__main__':
-    app.run()  # Turn off debug mode in production
+    app.run()
