@@ -27,14 +27,17 @@ data = pd.read_csv('dataset/loan-train.csv')
 def validate_input(value, expected_type, choices=None):
     """Validates input to ensure it meets expected type and optional constraints."""
     try:
+        if value is None:
+            return None
         if expected_type == int:
             value = int(value)
         elif expected_type == float:
             value = float(value)
         elif expected_type == str:
+            value = str(value)
             if choices and value not in choices:
                 raise ValueError("Invalid choice")
-        return value  # Ensure value is returned in all cases
+        return value
     except (ValueError, TypeError):
         return None
 
@@ -51,27 +54,27 @@ def predict():
     if request.method == 'POST':
         try:
             # Validate and retrieve input data from form
-            gender = validate_input(
-                request.form['Gender'], str, choices=['Male', 'Female'])
-            married = validate_input(
-                request.form['Married'], str, choices=['Yes', 'No'])
-            dependents = validate_input(
-                request.form['Dependents'], str, choices=['0', '1', '2', '3+'])
-            education = validate_input(request.form['Education'], str, choices=[
-                                       'Graduate', 'Not Graduate'])
-            self_employed = validate_input(
-                request.form['Self_Employed'], str, choices=['Yes', 'No'])
+            gender = validate_input(request.form.get(
+                'Gender'), str, choices=['Male', 'Female'])
+            married = validate_input(request.form.get(
+                'Married'), str, choices=['Yes', 'No'])
+            dependents = validate_input(request.form.get(
+                'Dependents'), str, choices=['0', '1', '2', '3+'])
+            education = validate_input(request.form.get(
+                'Education'), str, choices=['Graduate', 'Not Graduate'])
+            self_employed = validate_input(request.form.get(
+                'Self_Employed'), str, choices=['Yes', 'No'])
             applicant_income = validate_input(
-                request.form['ApplicantIncome'], float)
+                request.form.get('ApplicantIncome'), float)
             coapplicant_income = validate_input(
-                request.form['CoapplicantIncome'], float)
-            loan_amount = validate_input(request.form['LoanAmount'], float)
+                request.form.get('CoapplicantIncome'), float)
+            loan_amount = validate_input(request.form.get('LoanAmount'), float)
             loan_amount_term = validate_input(
-                request.form['Loan_Amount_Term'], float)
+                request.form.get('Loan_Amount_Term'), float)
             credit_history = validate_input(
-                request.form['Credit_History'], float)
-            property_area = validate_input(request.form['Property_Area'], str, choices=[
-                                           'Urban', 'Semiurban', 'Rural'])
+                request.form.get('Credit_History'), float)
+            property_area = validate_input(request.form.get(
+                'Property_Area'), str, choices=['Urban', 'Semiurban', 'Rural'])
 
             # Check for any invalid inputs
             if None in [gender, married, dependents, education, self_employed, applicant_income,
@@ -145,10 +148,14 @@ def dashboard():
 
         # Plot 3: Heatmap of feature correlations
         img3 = io.BytesIO()
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(10, 8))
         corr = data.corr()
-        sns.heatmap(corr, annot=True, cmap='coolwarm')
+        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f",
+                    annot_kws={"size": 10})  # Format annotations
         plt.title('Correlation Heatmap')
+        plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels
+        plt.yticks(rotation=0)  # Keep y-axis labels horizontal
+        plt.tight_layout()  # Adjust layout to fit everything
         plt.savefig(img3, format='png')
         img3.seek(0)
         plot_url3 = base64.b64encode(img3.getvalue()).decode()
