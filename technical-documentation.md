@@ -1,7 +1,7 @@
 
 # Loan Eligibility Checker - Technical Documentation  
 **Date:** November 16, 2024  
-**Author:** Livio Mororo  
+**Author:** Livio A. Mororo  
 
 ---
 
